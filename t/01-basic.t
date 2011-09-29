@@ -5,7 +5,8 @@ use Test::More;
 use lib "lib";
 
 use File::Path qw(remove_tree);
-remove_tree("t/data");
+use FindBin;
+remove_tree("$FindBin::Bin/data");
 
 use Mason;
 my $interp = Mason->new(
