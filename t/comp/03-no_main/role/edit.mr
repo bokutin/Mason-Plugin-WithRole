@@ -1,0 +1,2 @@
+<%method head_title>edit mode title</%method>
+<%method main_content>edit mode content</%method>
