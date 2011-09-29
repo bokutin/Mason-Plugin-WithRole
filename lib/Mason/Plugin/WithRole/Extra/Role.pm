@@ -12,8 +12,6 @@ sub init_meta {
     Method::Signatures::Simple->import( into => $for_class );
     #Moose->init_meta(@_);
     Moose::Role->init_meta(@_);
-    MooseX::StrictConstructor->init_meta(@_);
-    MooseX::HasDefaults::RO->init_meta(@_);
     {
         no strict 'refs';
         *{ $for_class . '::CLASS' } = sub () { $for_class };    # like CLASS.pm
