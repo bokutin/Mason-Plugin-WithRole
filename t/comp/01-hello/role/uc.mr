@@ -1,8 +1,5 @@
 <%class>
-around main => sub {
-    my $orig = shift;
-    my $self = shift;
-
+around main => method ($orig: $self) {
     my $content = $m->capture( sub { $self->$orig(@_) } );
     $m->print( uc $content );
 };
