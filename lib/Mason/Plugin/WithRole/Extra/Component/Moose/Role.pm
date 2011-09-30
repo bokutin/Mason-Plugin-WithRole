@@ -1,4 +1,4 @@
-package Mason::Plugin::WithRole::Extra::Role;
+package Mason::Plugin::WithRole::Extra::Component::Moose::Role;
 
 use Moose::Role                ();
 use Method::Signatures::Simple ();

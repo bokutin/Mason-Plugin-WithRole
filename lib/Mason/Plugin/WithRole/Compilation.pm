@@ -2,7 +2,7 @@ package Mason::Plugin::WithRole::Compilation;
 use Mason::PluginRole;
 
 method BUILD () {
-    if ( $self->path =~ m/\.mr$/ ) {
+    if ( $self->interp->is_role_comp_path($self->path) ) {
         delete $self->{methods}{main};
     }
 }
@@ -17,23 +17,18 @@ around valid_flags => sub {
     $flags;
 };
 
-method _output_class_initialization () {
-    return join(
-        "\n",
-        "our (\$_class_cmeta, \$m, \$_m_buffer, \$_interp);",
-        "BEGIN { ",
-        "local \$_interp = Mason::Interp->current_load_interp;",
-        #"\$_interp->component_moose_class->import;",
-        "\$_interp->component_moose_class->import if __PACKAGE__->isa('Moose::Object');",
-        "\$_interp->component_moose_role_class->import unless __PACKAGE__->isa('Moose::Object');",
-        "\$_interp->component_import_class->import;",
-        "}",
-        "*m = \\\$Mason::Request::current_request;",
-        "*_m_buffer = \\\$Mason::Request::current_buffer;",
+override _output_class_initialization => method {
+    my $ret = super();
 
-        # Must be defined here since inner relies on caller()
-        "sub _inner { inner() }"
-    );
-}
+    $ret =~
+         s{
+            \$_interp->component_moose_class->import;
+         }{
+            \$_interp->component_moose_class->import if __PACKAGE__->isa('Moose::Object');
+            \$_interp->component_moose_role_class->import unless __PACKAGE__->isa('Moose::Object');
+         }msx or die;
+
+    $ret;
+};
 
 1;
