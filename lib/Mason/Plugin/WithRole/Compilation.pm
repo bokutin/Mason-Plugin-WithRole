@@ -7,18 +7,15 @@ method BUILD () {
     }
 }
 
-around valid_flags => sub {
-    my $orig = shift;
-    my $self = shift;
-
+around valid_flags => method ($orig: $self) {
     my $flags = $self->$orig;
     push @$flags, "with";
 
     $flags;
 };
 
-override _output_class_initialization => method {
-    my $ret = super();
+around _output_class_initialization => method ($orig: $self) {
+    my $ret = $self->$orig(@_);
 
     $ret =~
          s{
