@@ -26,21 +26,9 @@ method _build_role_regex () {
 use Mason::Plugin::WithRole::Extra::Component::Moose::Role;
 has component_moose_role_class => ( is => "rw", isa => "Str", default => "Mason::Plugin::WithRole::Extra::Component::Moose::Role" );
 
-BEGIN { unmemoize(\&Mason::Interp::load); }
-BEGIN {
-    use PadWalker qw(peek_sub);
-    use vars qw($max_depth);
-    *max_depth = peek_sub(\&Mason::Interp::load)->{'$max_depth'};
-}
+use vars qw($max_depth);
 
-my $memoized = 0;
-sub BUILD {
-    unless ( $memoized++ ) {
-        memoize('Mason::Interp::load');
-    }
-}
-
-override load => method ($path) {
+my $load = method ($path) {
     local $Mason::Interp::current_load_interp = $self;
 
     my $code_cache = $self->code_cache;
@@ -166,6 +154,22 @@ override load => method ($path) {
 
     return $compc;
 };
+
+use PadWalker qw(peek_sub);
+my $load_overrided = 0;
+sub BUILD {
+    unless ( $load_overrided++ ) {
+        unmemoize('Mason::Interp::load');
+        *max_depth = peek_sub(\&Mason::Interp::load)->{'$max_depth'};
+        #die unless $max_depth == 16;
+        {
+            no strict 'refs';
+            no warnings 'redefine';
+            *{"Mason::Interp::load"} = $load;
+        }
+        memoize('Mason::Interp::load');
+    }
+}
 
 after modify_loaded_class => method ($compc) {
     my $object_file = $compc->cmeta->object_file;
