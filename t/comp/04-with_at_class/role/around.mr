@@ -1,0 +1,7 @@
+<%class>
+around render => method ($orig: $self) {
+    $m->print('>');
+    $self->$orig(@_);
+    $m->print('<');
+};
+</%class>
