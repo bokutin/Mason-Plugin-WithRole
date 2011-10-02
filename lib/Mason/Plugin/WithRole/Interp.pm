@@ -225,7 +225,7 @@ override _superclass_signature => method ($compc) {
     return "" if $self->is_role_comp_path($compc->cmeta->path);
 
     my @superclasses = $compc->meta->superclasses;
-    my @role_classes = map $_->name, grep $_->name->can('cmeta'), $compc->meta->calculate_all_roles_with_inheritance;
+    my @role_classes = grep $_->can('cmeta'), map $_->name, $compc->meta->calculate_all_roles_with_inheritance;
     push @superclasses, @role_classes;
 
     # Recursively load the superclasses for an existing component class in
