@@ -1,8 +1,5 @@
-<%class>
-with (
-    $m->load("/04-with_at_class/role/around.mr"),
-    $m->load("/04-with_at_class/role/around.mr"),
-);
-</%class>
+<%flags>
+with => ["role/around.mr", "role/around2.mr"];
+</%flags>
 
 .\

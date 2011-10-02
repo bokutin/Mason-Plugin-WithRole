@@ -158,7 +158,6 @@ default footer content
 is( $interp->run("/04-with_at_class/dot")->output, ".");
 is( $interp->run("/04-with_at_class/dot1")->output, ">.<");
 is( $interp->run("/04-with_at_class/dot2")->output, ">.<");
-is( $interp->run("/04-with_at_class/dot3")->output, ">.<");
-is( $interp->run("/04-with_at_class/dot4")->output, ">>>.<<<");
+is( $interp->run("/04-with_at_class/dot3")->output, "(>.<)");
 
 done_testing();

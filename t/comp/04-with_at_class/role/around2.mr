@@ -1,0 +1,10 @@
+<%class>
+around main => sub {
+    my $orig = shift;
+    my $self = shift;
+
+    $m->print('(');
+    $self->$orig(@_);
+    $m->print(')');
+};
+</%class>
