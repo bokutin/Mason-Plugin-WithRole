@@ -29,6 +29,7 @@ around _output_class_initialization => sub {
          }{
             \$_interp->component_moose_class->import if __PACKAGE__->isa('Moose::Object');
             \$_interp->component_moose_role_class->import unless __PACKAGE__->isa('Moose::Object');
+            sub cmeta () { \$_[0]->can('_class_cmeta') ? \$_[0]->_class_cmeta : undef }
          }msx or die;
 
     $ret;
