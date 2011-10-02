@@ -119,7 +119,7 @@ my $load = method ($path) {
                 && $entry->{default_parent_path} eq $default_parent_path )
             {
                 my $compc = $entry->{compc};
-                if ( $self->is_role_comp_path($path) or $entry->{superclass_signature} eq $self->_superclass_signature($compc) ) {
+                if ( $entry->{superclass_signature} eq $self->_superclass_signature($compc) ) {
                     return $compc;
                 }
             }
@@ -148,7 +148,7 @@ my $load = method ($path) {
             source_lastmod       => $source_lastmod,
             default_parent_path  => $default_parent_path,
             compc                => $compc,
-            superclass_signature => $compc->meta->isa("Moose::Meta::Role") ? "" : $self->_superclass_signature($compc),
+            superclass_signature => $self->_superclass_signature($compc),
         }
     );
 
@@ -219,6 +219,29 @@ override _load_class_from_object_file => method ( $compc, $object_file, $path, $
 
     $compc->_set_class_cmeta($self);
     $self->modify_loaded_class($compc);
+};
+
+override _superclass_signature => method ($compc) {
+    return "" if $self->is_role_comp_path($compc->cmeta->path);
+
+    my @superclasses = $compc->meta->superclasses;
+    my @role_classes = map $_->name, grep $_->name->can('cmeta'), $compc->meta->calculate_all_roles_with_inheritance;
+    push @superclasses, @role_classes;
+
+    # Recursively load the superclasses for an existing component class in
+    # case they have changed.
+    #
+    foreach my $superclass (@superclasses) {
+        if ( my $cmeta = $superclass->cmeta ) {
+            my $path = $cmeta->path;
+            $self->load( $cmeta->path );
+        }
+    }
+
+    # Return a unique signature representing the component class's superclasses
+    # and their versions.
+    #
+    return join( ",", map { join( "-", $_, $_->cmeta ? $_->cmeta->id : 0 ) } @superclasses );
 };
 
 1;

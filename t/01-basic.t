@@ -160,4 +160,31 @@ is( $interp->run("/04-with_at_class/dot1")->output, ">.<");
 is( $interp->run("/04-with_at_class/dot2")->output, ">.<");
 is( $interp->run("/04-with_at_class/dot3")->output, "(>.<)");
 
+is( $interp->run("/05-refresh/dot")->output, ">.<");
+use IO::All;
+for my $item (
+    { path => "/05-refresh/dot.mc"         , touch => 0 } ,
+    { path => "/05-refresh/dot.mc"         , touch => 1 } ,
+    { path => "/05-refresh/role/around.mr" , touch => 0 } ,
+    { path => "/05-refresh/role/around.mr" , touch => 1 } ,
+) {
+    my $id1 = $interp->load("/05-refresh/dot.mc")->cmeta->id;
+    #diag( $id1 );
+
+    $interp->_flush_load_cache;
+    if ( $item->{touch} ) {
+        io("$FindBin::Bin/comp/".$item->{path})->touch;
+    }
+
+    my $id2 = $interp->load("/05-refresh/dot.mc")->cmeta->id;
+    #diag( $id2 );
+
+    if ( $item->{touch} ) {
+        isnt($id1, $id2);
+    }
+    else {
+        is($id1, $id2);
+    }
+}
+
 done_testing();
