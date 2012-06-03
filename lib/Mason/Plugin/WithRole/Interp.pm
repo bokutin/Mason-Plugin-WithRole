@@ -26,7 +26,7 @@ method _build_role_regex () {
 use Mason::Plugin::WithRole::Extra::Component::Moose::Role;
 has component_moose_role_class => ( is => "rw", isa => "Str", default => "Mason::Plugin::WithRole::Extra::Component::Moose::Role" );
 
-use vars qw($max_depth);
+my $max_depth = 16;
 
 my $load = method ($path) {
     local $Mason::Interp::current_load_interp = $self;
@@ -154,20 +154,18 @@ my $load = method ($path) {
 
     return $compc;
 };
+$load = memoize($load);
 
-use PadWalker qw(peek_sub);
-my $load_overrided = 0;
 sub BUILD {
-    unless ( $load_overrided++ ) {
-        unmemoize('Mason::Interp::load');
-        *max_depth = peek_sub(\&Mason::Interp::load)->{'$max_depth'};
-        #die unless $max_depth == 16;
-        {
-            no strict 'refs';
-            no warnings 'redefine';
-            *{"Mason::Interp::load"} = $load;
-        }
-        memoize('Mason::Interp::load');
+    my $self = shift;
+
+    unless ( $self->can('load') == $load ) {
+        $self->meta->make_mutable;
+
+        $self->meta->remove_method('load');
+        $self->meta->add_method('load', $load);
+
+        $self->meta->make_immutable;
     }
 }
 
@@ -193,6 +191,11 @@ override _add_default_wrap_method => method ($compc) {
     unless ( $compc->meta->isa("Moose::Meta::Role") ) {
         super();
     }
+};
+
+override _flush_load_cache => method () {
+    Memoize::flush_cache($self->can('comp_exists'));
+    Memoize::flush_cache($self->can('load'));
 };
 
 override _load_class_from_object_file => method ( $compc, $object_file, $path, $default_parent_path ) {
