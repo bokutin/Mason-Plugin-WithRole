@@ -37,6 +37,6 @@ my $t2 = countit($count, sub {
 #warn Dumper [$t1,$t2];
 my $n1 = $t1->[5];
 my $n2 = $t2->[5];
-ok( $n1*0.8 < $n2 and $n2 < $n1*1.2, sprintf("%f < %f < %f", $n1*0.8, $n2, $n1*1.2));
+ok( $n1*0.8 < $n2 and $n2 < $n1*1.2 ? 1 : 0, sprintf("%f < %f < %f", $n1*0.8, $n2, $n1*1.2));
 
 done_testing();

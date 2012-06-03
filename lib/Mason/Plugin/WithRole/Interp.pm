@@ -154,20 +154,7 @@ my $load = method ($path) {
 
     return $compc;
 };
-$load = memoize($load);
-
-sub BUILD {
-    my $self = shift;
-
-    unless ( $self->can('load') == $load ) {
-        $self->meta->make_mutable;
-
-        $self->meta->remove_method('load');
-        $self->meta->add_method('load', $load);
-
-        $self->meta->make_immutable;
-    }
-}
+__PACKAGE__->meta->add_method( load => memoize($load) );
 
 after modify_loaded_class => method ($compc) {
     my $object_file = $compc->cmeta->object_file;
